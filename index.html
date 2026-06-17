@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
+        .calculator { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #0078D4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #005A9E; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <h2>BMI Calculator</h2>
+    <input type="number" id="weight" placeholder="Weight (kg)" required>
+    <input type="number" id="height" placeholder="Height (cm)" required>
+    <button onclick="calculateBMI()">Calculate</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    async function calculateBMI() {
+        const weight = document.getElementById('weight').value;
+        const height = document.getElementById('height').value;
+        const resultDiv = document.getElementById('result');
+
+        if (!weight || !height) {
+            resultDiv.innerText = "Please enter both weight and height.";
+            resultDiv.style.color = "red";
+            return;
+        }
+
+        resultDiv.innerText = "Calculating...";
+        resultDiv.style.color = "black";
+
+        // IMPORTANT: Replace this URL with your actual Azure Function API URL later!
+        const backendUrl = "https://YOUR-AZURE-FUNCTION-URL.azurewebsites.net/api/CalculateBMI";
+
+        try {
+            const response = await fetch(backendUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ weight: parseFloat(weight), height: parseFloat(height) })
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            resultDiv.innerText = `Your BMI: ${data.bmi} (${data.category})`;
+            resultDiv.style.color = "green";
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultDiv.innerText = "Failed to connect to backend.";
+            resultDiv.style.color = "red";
+        }
+    }
+</script>
+
+</body>
+</html>
